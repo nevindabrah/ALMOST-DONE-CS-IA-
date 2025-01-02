@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Create Planner{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="text-primary">Create a Student Planner</h3>
+          <div class="streak-badge bg-warning text-dark rounded-pill px-3 py-1" style="font-weight: bold; font-size: 1.2rem;">
+            🔥 Total Planners: {{ total_planners }} 
+          </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('views.planner') }}">
+          <!-- Plan Title -->
+          <div class="form-group mb-3">
+            <label for="title" class="form-label">Plan Title</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Enter plan title" required>
+          </div>
+
+          <!-- Start Date -->
+          <div class="form-group mb-3">
+            <label for="start_date" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="start_date" name="start_date" required>
+          </div>
+
+          <!-- End Date -->
+          <div class="form-group mb-3">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="end_date" name="end_date" required>
+          </div>
+
+          <!-- Tasks -->
+          <div class="form-group mb-4">
+            <label for="tasks" class="form-label">Tasks</label>
+            <div id="tasks-section">
+              <div class="task-item d-flex align-items-center mb-2">
+                <input type="text" class="form-control" name="tasks" placeholder="Task description" required>
+                <select class="form-select ms-2" name="days" required>
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+                <button type="button" class="btn btn-danger ms-2 remove-task">Remove</button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary mt-2" id="add-task">Add Task</button>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Submit Planner</button>
+            <a href="{{ url_for('views.planner_history') }}" class="btn btn-info">View Planner History</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('add-task').addEventListener('click', function() {
+    const taskItem = document.querySelector('.task-item').cloneNode(true);
+    taskItem.querySelector('input').value = '';
+    document.getElementById('tasks-section').appendChild(taskItem);
+  });
+
+  document.getElementById('tasks-section').addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-task')) {
+      e.target.closest('.task-item').remove();
+    }
+  });
+</script>
+{% endblock %}

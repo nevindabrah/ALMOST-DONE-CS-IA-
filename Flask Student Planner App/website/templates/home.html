@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="text-primary text-center" style="font-size: 2rem; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;">
+      Welcome, {{ user.fullname }}!
+    </h1>
+    <div class="streak-badge bg-warning text-dark rounded-pill px-3 py-1" style="font-weight: bold; font-size: 1.2rem;">
+      🔥 Total Planners: {{ total_planners }}
+    </div>
+  </div>
+
+  <!-- Weekly Planner Section -->
+  <div class="card shadow mb-3" style="background: linear-gradient(to right, #6a11cb, #2575fc); color: white;">
+    <div class="card-body text-center py-3">
+      <div class="d-flex justify-content-center align-items-center">
+        <i class="fas fa-calendar-alt fa-3x me-3"></i>
+        <div>
+          <h4 class="card-title mb-2">Your Weekly Planner</h4>
+          <p class="small">Plan your week, set goals, and stay on track with ease!</p>
+        </div>
+      </div>
+      <a href="/planner" class="btn btn-light btn-lg mt-3 planner-btn" style="color: #2575fc; font-weight: bold;">Go to Planner</a>
+    </div>
+  </div>
+
+  <!-- Overview Cards -->
+  <div class="row">
+    <!-- Tasks -->
+    <div class="col-md-4">
+      <div class="card shadow text-center p-2 card-reduced" style="border: 1px solid #2575fc;">
+        <div class="card-body">
+          <h5 class="card-title text-primary mb-2">To-Do List Overview</h5>
+          <h6>Completed: <span class="badge bg-success">{{ completed_tasks }}</span></h6>
+          <h6>In Progress: <span class="badge bg-warning">{{ in_progress_tasks }}</span></h6>
+          <h6>Overdue: <span class="badge bg-danger">{{ overdue_tasks }}</span></h6>
+          <a href="/todo" class="btn btn-primary btn-sm mt-2">View To-Do List</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timetable & Notes -->
+    <div class="col-md-4">
+      <div class="card shadow text-center p-2 card-reduced" style="border: 1px solid #2575fc;">
+        <div class="card-body">
+          <h5 class="card-title text-primary mb-2">Timetable & Notes</h5>
+          <h6 class="mb-2">Timetable Images: <span class="badge bg-info text-dark">{{ images_total }}</span></h6>
+          <h6 class="mb-3">Notes: <span class="badge bg-primary text-light">{{ notes_total }}</span></h6>
+          <div class="d-flex justify-content-center gap-2">
+            <a href="/timetable" class="btn btn-info btn-sm">Manage Timetable(s)</a>
+            <a href="/notes" class="btn btn-primary btn-sm">View Notes</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Motivational Quotes -->
+    <div class="col-md-4">
+      <div class="card shadow p-2 text-center card-reduced" style="background: #f3f9ff; border: 1px solid #2575fc;">
+        <div class="card-body">
+          <h5 class="card-title text-primary mb-2">Motivational Quote</h5>
+          <p id="quoteText" class="card-text text-muted small">
+            "A goal without a plan is just a wish."
+          </p>
+          <button id="newQuoteButton" class="btn btn-info btn-sm">New Quote</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .planner-btn {
+    font-size: 1.5rem; /* Keeps the "Go to Planner" button large */
+    padding: 10px 30px;
+  }
+
+  .card-reduced {
+    min-height: 220px; /* Reduced height for bottom cards */
+    padding: 1rem; /* Compact padding */
+  }
+
+  .card-title {
+    font-size: 1.1rem; /* Slightly smaller title for uniform appearance */
+  }
+
+  .card-text {
+    font-size: 0.9rem; /* Reduces font size for text content */
+  }
+</style>
+
+<script>
+  // Quotes array
+  const quotes = [
+    "A goal without a plan is just a wish.",
+    "Plans are nothing; planning is everything.",
+    "By failing to prepare, you are preparing to fail.",
+    "Give me six hours to chop down a tree and I will spend the first four sharpening the axe.",
+    "The more time you spend contemplating what you should have done, you lose valuable time planning what you can and will do.",
+    "Planning is bringing the future into the present so that you can do something about it now.",
+    "Success doesn’t just happen. It’s planned for.",
+    "Your goals don't care how you feel. Stick to the plan.",
+    "A little planning ahead saves a lot of time later."
+  ];
+
+  // Rotate quotes automatically
+  let currentQuoteIndex = 0;
+  function rotateQuote() {
+    currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+    document.getElementById("quoteText").textContent = quotes[currentQuoteIndex];
+  }
+  setInterval(rotateQuote, 5000);
+  document.getElementById("newQuoteButton").addEventListener("click", rotateQuote);
+</script>
+{% endblock %}

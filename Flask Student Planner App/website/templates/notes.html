@@ -1,0 +1,101 @@
+{% extends "base.html" %} 
+{% block title %}Reflections and Notes{% endblock %} 
+{% block content %}
+
+  <br></br>
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow p-4">
+        <h1 class="text-center text-primary">Reflections/Notes</h1>
+  <form method="POST" id="add-note-form">
+    <textarea name="note" id="note" class="form-control note-textarea" rows="5" style="height: 100px;" placeholder="Type here"></textarea>
+    <br />
+    <div align="center">
+      <button type="submit" class="btn btn-primary">Add Reflection/Note</button>
+    </div>
+  </form>
+  <br>
+  <ul class="list-group list-group-flush" id="notes">
+    {% for note in user.notes|reverse %}
+    <li class="list-group-item" id="note-{{ note.id }}">
+      <div class="d-flex justify-content-between align-items-center">
+        <div id="note-content-{{ note.id }}">
+          {% for line in note.data.split('\n') %}
+            {{ line }}<br>
+          {% endfor %}
+          <small class="text-muted">
+            Posted on: {{ note.date.strftime('%Y-%m-%d %H:%M:%S') }}
+            {% if note.edited_date %}
+              (Edited on: {{ note.edited_date.strftime('%Y-%m-%d %H:%M:%S') }})
+            {% endif %}
+          </small>
+        </div>
+        <div id="note-edit-{{ note.id }}" style="display: none;">
+          <textarea class="form-control note-textarea" rows="5">{{ note.data }}</textarea>
+          <button class="btn btn-primary btn-sm mt-2" onclick="saveNoteChanges({{ note.id }})">Save</button>
+          <button class="btn btn-secondary btn-sm mt-2" onclick="cancelEdit({{ note.id }})">Cancel</button>
+        </div>
+        <div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="editNote({{ note.id }})">Edit</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteNote({{ note.id }})">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <script>
+    function editNote(noteId) {
+      document.getElementById(`note-content-${noteId}`).style.display = 'none';
+      document.getElementById(`note-edit-${noteId}`).style.display = 'block';
+    }
+
+    function cancelEdit(noteId) {
+      document.getElementById(`note-content-${noteId}`).style.display = 'block';
+      document.getElementById(`note-edit-${noteId}`).style.display = 'none';
+    }
+
+    function saveNoteChanges(noteId) {
+      const noteContent = document.querySelector(`#note-edit-${noteId} textarea`).value;
+
+      fetch(`/edit-note/${noteId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ note: noteContent })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Delete the old note after the new note is created
+          deleteNote(noteId);
+        } else {
+          alert('Error editing note');
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+    function deleteNote(noteId) {
+      fetch('/delete-note', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ noteId: noteId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById(`note-${noteId}`).remove();
+        } else {
+          alert('Error deleting note');
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  </script>
+{% endblock %}

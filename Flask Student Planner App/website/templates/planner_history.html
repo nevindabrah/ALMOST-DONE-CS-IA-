@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Planner History{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="text-primary">Planner History</h3>
+          <div class="streak-badge bg-warning text-dark rounded-pill px-3 py-1" style="font-weight: bold; font-size: 1.2rem;">
+            🔥 Total Planners: {{ planners|length }} 
+          </div>
+        </div>
+
+        {% if planners %}
+          <div class="planner-list">
+            {% for planner in planners %}
+              <div class="card mb-3">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                  <h5>{{ planner.title }} ({{ planner.start_date.strftime('%d/%m/%Y') }} <span style='font-weight: bold; color: white;'>—</span> {{ planner.end_date.strftime('%d/%m/%Y') }})</h5>
+                  <div>
+                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ planner.id }}">Delete</button>
+                  </div>
+
+                  <!-- Delete Modal -->
+                  <div class="modal fade" id="deleteModal{{ planner.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ planner.id }}" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header" style="background-color: #dc3545;">
+                          <h5 class="modal-title" id="deleteModalLabel{{ planner.id }}" style="color: black;">Confirm Delete</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <p style="color: black;">Are you sure you want to delete the plan <strong>{{ planner.title }}</strong>?</p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                          <form method="POST" action="{{ url_for('views.delete_planner', planner_id=planner.id) }}">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  {% if planner.tasks %}
+                    <ul class="list-group">
+                      {% for task in planner.tasks %}
+                        <li class="list-group-item"><strong>{{ task.day }}:</strong> {{ task.description }}</li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p>No tasks added for this planner.</p>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>No planners found. <a href="{{ url_for('views.planner') }}" class="btn btn-primary">Create one now</a>.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
