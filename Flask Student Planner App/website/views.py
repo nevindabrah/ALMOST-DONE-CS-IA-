@@ -152,21 +152,40 @@ def notes():
 
     return render_template("notes.html", user=current_user)
 
+@views.route('/edit-note/<int:note_id>', methods=['POST'])
+@login_required
+def edit_note(note_id):
+    note = Note.query.get(note_id)
+    if note and note.user_id == current_user.id:
+        note_content = request.json.get('note')
+        if note_content:
+            # Create a new note with the updated content
+            new_note = Note(data=note_content, user_id=current_user.id, edited_date=func.now())
+            db.session.add(new_note)
+            db.session.commit()
+            return jsonify({'success': True, 'new_note_id': new_note.id})
+    return jsonify({'success': False})
+
+from flask import flash
+
 @views.route('/delete-note', methods=['POST'])
 @login_required
 def delete_note():  
     try:
-        note = json.loads(request.data)  # this function expects a JSON from the frontend
-        noteId = note['noteId']
+        note = json.loads(request.data)  # Expects a JSON payload
+        noteId = note.get('noteId')
         note = Note.query.get(noteId)
         if note and note.user_id == current_user.id:
             db.session.delete(note)
             db.session.commit()
+            flash('Note deleted successfully!', category='success')  # Flash success message
             return jsonify({'success': True})
         else:
             return jsonify({'success': False, 'error': 'Note not found or unauthorized'}), 403
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
 
 
     return jsonify({})
@@ -201,8 +220,9 @@ def delete_image(image_id):
     if image and image.user_id == current_user.id:
         db.session.delete(image)
         db.session.commit()
-        return jsonify({'success': True})
-    return jsonify({'success': False})
+        flash("Timetable image deleted successfully!", "success")
+        return jsonify(success=True)
+    return jsonify(success=False), 400
 
 @views.route('/edit-image/<int:image_id>', methods=['POST'])
 @login_required
@@ -221,19 +241,6 @@ def edit_image(image_id):
         return jsonify({'success': True})
     return jsonify({'success': False})
 
-@views.route('/edit-note/<int:note_id>', methods=['POST'])
-@login_required
-def edit_note(note_id):
-    note = Note.query.get(note_id)
-    if note and note.user_id == current_user.id:
-        note_content = request.json.get('note')
-        if note_content:
-            # Create a new note with the updated content
-            new_note = Note(data=note_content, user_id=current_user.id, edited_date=func.now())
-            db.session.add(new_note)
-            db.session.commit()
-            return jsonify({'success': True, 'new_note_id': new_note.id})
-    return jsonify({'success': False})
 
 @views.route('/todo', methods=['GET', 'POST'])
 @login_required
