@@ -10,7 +10,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h3 class="text-primary">Create a Weekly Student Planner</h3>
           <div class="streak-badge bg-warning text-dark rounded-pill px-3 py-1" style="font-weight: bold; font-size: 1.2rem;">
-            🔥 Total Planners: {{ total_planners }} 
+            🔥 Total Planners: {{ total_planners }}
           </div>
         </div>
 
@@ -34,35 +34,36 @@
           </div>
 
           <!-- Tasks Section -->
-<div class="form-group mb-4">
-  <label for="tasks" class="form-label">Tasks</label>
-  <div id="tasks-section">
-      <div class="task-item d-flex align-items-center mb-2">
-          <input type="text" class="form-control" name="tasks" placeholder="Task description" required>
-          
-          <!-- Day Selection -->
-          <select class="form-select ms-2" name="days" id="days-select" required>
-              <option value="Monday">Monday</option>
-              <option value="Tuesday">Tuesday</option>
-              <option value="Wednesday">Wednesday</option>
-              <option value="Thursday">Thursday</option>
-              <option value="Friday">Friday</option>
-              <option value="Saturday">Saturday</option>
-              <option value="Sunday">Sunday</option>
-          </select>
+          <div class="form-group mb-4">
+            <label for="tasks" class="form-label">Tasks</label>
+            <div id="tasks-section">
+              <div class="task-item d-flex align-items-center mb-2">
+                <!-- Task Description -->
+                <input type="text" class="form-control flex-grow-1" name="tasks" placeholder="Task description" required style="min-width: 150px;">
 
-          <!-- Start Time -->
-          <input type="time" class="form-control ms-2" name="start_time" required>
+                <!-- Day Selection -->
+                <select class="form-select ms-2" name="days" id="days-select" required style="min-width: 120px;">
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
 
-          <!-- End Time -->
-          <input type="time" class="form-control ms-2" name="end_time" required>
+                <!-- Start Time -->
+                <input type="time" class="form-control ms-2" name="start_time" required style="min-width: 100px;">
 
-          <button type="button" class="btn btn-danger ms-2 remove-task">Remove</button>
-      </div>
-  </div>
-  <button type="button" class="btn btn-secondary mt-2" id="add-task">Add Task</button>
-</div>
+                <!-- End Time -->
+                <input type="time" class="form-control ms-2" name="end_time" required style="min-width: 100px;">
 
+                <!-- Remove Button -->
+                <button type="button" class="btn btn-danger ms-2 remove-task">Remove</button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary mt-2" id="add-task">Add Task</button>
+          </div>
 
           <!-- Action Buttons -->
           <div class="d-flex justify-content-between">
@@ -100,7 +101,9 @@
   // Clone task item and append it to the tasks section
   document.getElementById('add-task').addEventListener('click', function() {
     const taskItem = document.querySelector('.task-item').cloneNode(true);
-    taskItem.querySelector('input').value = '';
+    taskItem.querySelector('input[type="text"]').value = '';
+    taskItem.querySelector('input[name="start_time"]').value = '';
+    taskItem.querySelector('input[name="end_time"]').value = '';
     document.getElementById('tasks-section').appendChild(taskItem);
   });
 

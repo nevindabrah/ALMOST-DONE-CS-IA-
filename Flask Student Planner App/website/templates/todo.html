@@ -63,8 +63,12 @@
               </span>
               <p class="mb-0 small text-muted">
                 {% if task.due_date %}
-                  Due: {{ task.due_date }}
-                  ({% if task.due_date > now.date() %}{{ (task.due_date - now.date()).days }} days left{% else %}Overdue{% endif %})
+                  <strong>Due:</strong> 
+                  <span 
+                    style="font-weight: bold; {% if task.due_date <= now.date() %}color: red;{% endif %}">
+                    {{ task.due_date.strftime('%d/%m/%Y') }}
+                  </span>
+                  ({% if task.due_date > now.date() %}{{ (task.due_date - now.date()).days }} days left{% else %}<strong>Overdue</strong>{% endif %})
                 {% else %}
                   No deadline set
                 {% endif %}
