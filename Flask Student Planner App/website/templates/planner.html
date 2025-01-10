@@ -33,26 +33,36 @@
             <input type="date" class="form-control" id="end_date" name="end_date" required>
           </div>
 
-          <!-- Tasks -->
-          <div class="form-group mb-4">
-            <label for="tasks" class="form-label">Tasks</label>
-            <div id="tasks-section">
-              <div class="task-item d-flex align-items-center mb-2">
-                <input type="text" class="form-control" name="tasks" placeholder="Task description" required>
-                <select class="form-select ms-2" name="days" id="days-select" required>
-                  <option value="Monday">Monday</option>
-                  <option value="Tuesday">Tuesday</option>
-                  <option value="Wednesday">Wednesday</option>
-                  <option value="Thursday">Thursday</option>
-                  <option value="Friday">Friday</option>
-                  <option value="Saturday">Saturday</option>
-                  <option value="Sunday">Sunday</option>
-                </select>
-                <button type="button" class="btn btn-danger ms-2 remove-task">Remove</button>
-              </div>
-            </div>
-            <button type="button" class="btn btn-secondary mt-2" id="add-task">Add Task</button>
-          </div>
+          <!-- Tasks Section -->
+<div class="form-group mb-4">
+  <label for="tasks" class="form-label">Tasks</label>
+  <div id="tasks-section">
+      <div class="task-item d-flex align-items-center mb-2">
+          <input type="text" class="form-control" name="tasks" placeholder="Task description" required>
+          
+          <!-- Day Selection -->
+          <select class="form-select ms-2" name="days" id="days-select" required>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+              <option value="Saturday">Saturday</option>
+              <option value="Sunday">Sunday</option>
+          </select>
+
+          <!-- Start Time -->
+          <input type="time" class="form-control ms-2" name="start_time" required>
+
+          <!-- End Time -->
+          <input type="time" class="form-control ms-2" name="end_time" required>
+
+          <button type="button" class="btn btn-danger ms-2 remove-task">Remove</button>
+      </div>
+  </div>
+  <button type="button" class="btn btn-secondary mt-2" id="add-task">Add Task</button>
+</div>
+
 
           <!-- Action Buttons -->
           <div class="d-flex justify-content-between">

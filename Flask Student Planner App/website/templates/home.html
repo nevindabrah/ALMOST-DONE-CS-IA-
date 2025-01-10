@@ -140,7 +140,9 @@
     currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
     document.getElementById("quoteText").textContent = quotes[currentQuoteIndex];
   }
-  setInterval(rotateQuote, 5000);
+  setInterval(rotateQuote, 10000);
   document.getElementById("newQuoteButton").addEventListener("click", rotateQuote);
 </script>
+
+
 {% endblock %}

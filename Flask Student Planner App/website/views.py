@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, send_file, current_app
 from flask_login import login_required, current_user
-from .models import Note, Image, Todo, Planner, Task, StudentPlanner, PlannerTask, User
+from .models import Note, Image, Todo, Planner, Task, StudentPlanner, PlannerTask, User, PlannerFeedback
 from . import db
 import json
 import os
@@ -71,6 +71,8 @@ def home():
 
 
 # Planner Page
+from datetime import datetime
+
 @views.route('/planner', methods=['GET', 'POST'])
 @login_required
 def planner():
@@ -106,30 +108,102 @@ def planner():
         # Add tasks
         tasks = request.form.getlist('tasks')
         days = request.form.getlist('days')
-        for task, day in zip(tasks, days):
+        start_times = request.form.getlist('start_time')
+        end_times = request.form.getlist('end_time')
+
+        for task, day, start_time_str, end_time_str in zip(tasks, days, start_times, end_times):
             if task.strip():
-                new_task = PlannerTask(description=task.strip(), day=day, student_planner_id=new_planner.id)
+                try:
+                    start_time = datetime.strptime(start_time_str, '%H:%M').time()
+                    end_time = datetime.strptime(end_time_str, '%H:%M').time()
+                except ValueError:
+                    flash('Invalid time format. Use HH:MM.', category='error')
+                    return redirect(url_for('views.planner'))
+
+                new_task = PlannerTask(
+                    description=task.strip(),
+                    day=day,
+                    start_time=start_time,
+                    end_time=end_time,
+                    student_planner_id=new_planner.id
+                )
                 db.session.add(new_task)
 
         db.session.commit()
         flash('Planner created successfully!', category='success')
         return redirect(url_for('views.planner_history', user_id=current_user.id))
 
-    # Fetch all planners for the user to display the total count
     total_planners = StudentPlanner.query.filter_by(user_id=current_user.id).count()
-
     return render_template('planner.html', user=current_user, total_planners=total_planners)
 
 
-@views.route('/planner-history/<int:user_id>', methods=['GET'])
+@views.route('/planner-history/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def planner_history(user_id):
     planners = StudentPlanner.query.filter_by(user_id=user_id).all()
     for planner in planners:
         planner.tasks = PlannerTask.query.filter_by(student_planner_id=planner.id).all()
-
-    user = User.query.get(user_id)  # Fetch the user to display their name
+    
+    user = User.query.get(user_id)  # Fetch the student user
+    
+    # Handle feedback submission
+    if request.method == 'POST':
+        comment = request.form.get('comment')
+        planner_id = request.form.get('planner_id')
+        if comment and planner_id:
+            feedback = PlannerFeedback(
+                comment=comment,
+                user_id=current_user.id,
+                student_planner_id=planner_id
+            )
+            db.session.add(feedback)
+            db.session.commit()
+            flash('Feedback added successfully!', 'success')
+        return redirect(url_for('views.planner_history', user_id=user_id))
+    
     return render_template('planner_history.html', user=current_user, planners=planners, student_user=user)
+
+
+@views.route('/edit-feedback/<int:feedback_id>', methods=['POST'])
+@login_required
+def edit_feedback(feedback_id):
+    feedback = PlannerFeedback.query.get_or_404(feedback_id)
+    if feedback.user_id != current_user.id or current_user.role != 'teacher':
+        flash("You don't have permission to edit this feedback.", category='error')
+        return redirect(url_for('views.planner_history', user_id=feedback.student_planner.user_id))
+
+    comment = request.form.get('comment')
+    if not comment:
+        flash("Comment cannot be empty.", category='error')
+    else:
+        feedback.comment = comment
+        db.session.commit()
+        flash("Feedback updated successfully.", category='success')
+
+    return redirect(url_for('views.planner_history', user_id=feedback.student_planner.user_id))
+
+
+@views.route('/delete-feedback/<int:feedback_id>', methods=['POST'])
+@login_required
+def delete_feedback(feedback_id):
+    feedback = (
+        db.session.query(PlannerFeedback)
+        .join(StudentPlanner)
+        .filter(PlannerFeedback.id == feedback_id)
+        .first_or_404()
+    )
+
+    if feedback.user_id != current_user.id or current_user.role != 'teacher':
+        flash("You don't have permission to delete this feedback.", category='error')
+        return redirect(url_for('views.planner_history', user_id=feedback.student_planner.user_id))
+    
+    db.session.delete(feedback)
+    db.session.commit()
+    flash('Feedback deleted successfully', 'success')
+    return redirect(url_for('views.planner_history', user_id=feedback.student_planner.user_id))
+
+
+
 
 
 @views.route('/planner/<int:planner_id>', methods=['GET'])
