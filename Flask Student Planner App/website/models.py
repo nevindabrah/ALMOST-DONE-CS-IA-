@@ -9,10 +9,12 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
     fullname = db.Column(db.String(150))
-    streak_counter = db.Column(db.Integer, default=0)  # This adds the streak_counter
+    role = db.Column(db.String(50), nullable=False)  # New role field ('student' or 'teacher')
+    streak_counter = db.Column(db.Integer, default=0)
     notes = db.relationship('Note', backref='user', lazy=True)
     tasks = db.relationship('Todo', backref='user', lazy=True)
     planners = db.relationship('Planner', backref='user', lazy=True)
+
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)

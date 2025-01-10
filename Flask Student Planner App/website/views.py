@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, send_file, current_app
 from flask_login import login_required, current_user
-from .models import Note, Image, Todo, Planner, Task, StudentPlanner, PlannerTask
+from .models import Note, Image, Todo, Planner, Task, StudentPlanner, PlannerTask, User
 from . import db
 import json
 import os
@@ -17,32 +17,56 @@ views = Blueprint('views', __name__)
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
-    # Query totals for notes and images
-    notes_total = Note.query.filter_by(user_id=current_user.id).count()
-    images_total = Image.query.filter_by(user_id=current_user.id).count()
+    if current_user.role == 'student':
+        # Query totals for notes and images
+        notes_total = Note.query.filter_by(user_id=current_user.id).count()
+        images_total = Image.query.filter_by(user_id=current_user.id).count()
 
-    # Query totals for tasks
-    completed_tasks = Todo.query.filter_by(user_id=current_user.id, completed=True).count()
-    in_progress_tasks = Todo.query.filter_by(user_id=current_user.id, completed=False).count()
-    overdue_tasks = Todo.query.filter(
-        Todo.user_id == current_user.id,
-        Todo.due_date < datetime.utcnow(),
-        Todo.completed == False
-    ).count()
+        # Query totals for tasks
+        completed_tasks = Todo.query.filter_by(user_id=current_user.id, completed=True).count()
+        in_progress_tasks = Todo.query.filter_by(user_id=current_user.id, completed=False).count()
+        overdue_tasks = Todo.query.filter(
+            Todo.user_id == current_user.id,
+            Todo.due_date < datetime.utcnow(),
+            Todo.completed == False
+        ).count()
 
-    # Query total number of planners
-    total_planners = StudentPlanner.query.filter_by(user_id=current_user.id).count()
+        # Query total number of planners
+        total_planners = StudentPlanner.query.filter_by(user_id=current_user.id).count()
 
-    return render_template(
-        "home.html",
-        user=current_user,
-        notes_total=notes_total,
-        images_total=images_total,
-        completed_tasks=completed_tasks,
-        in_progress_tasks=in_progress_tasks,
-        overdue_tasks=overdue_tasks,
-        total_planners=total_planners  # Pass total planners to the template
-    )
+        return render_template(
+            "home.html",
+            user=current_user,
+            notes_total=notes_total,
+            images_total=images_total,
+            completed_tasks=completed_tasks,
+            in_progress_tasks=in_progress_tasks,
+            overdue_tasks=overdue_tasks,
+            total_planners=total_planners  # Pass total planners to the template
+        )
+
+    elif current_user.role == 'teacher':
+        # Query total number of students
+        total_students = User.query.filter_by(role='student').count()
+
+        # Query totals for tasks (if applicable to teachers)
+        completed_tasks = Todo.query.filter_by(user_id=current_user.id, completed=True).count()
+        in_progress_tasks = Todo.query.filter_by(user_id=current_user.id, completed=False).count()
+        overdue_tasks = Todo.query.filter(
+            Todo.user_id == current_user.id,
+            Todo.due_date < datetime.utcnow(),
+            Todo.completed == False
+        ).count()
+
+        return render_template(
+            "home.html",
+            user=current_user,
+            total_students=total_students,
+            completed_tasks=completed_tasks,
+            in_progress_tasks=in_progress_tasks,
+            overdue_tasks=overdue_tasks
+        )
+
 
 
 
@@ -89,7 +113,7 @@ def planner():
 
         db.session.commit()
         flash('Planner created successfully!', category='success')
-        return redirect(url_for('views.planner_history'))
+        return redirect(url_for('views.planner_history', user_id=current_user.id))
 
     # Fetch all planners for the user to display the total count
     total_planners = StudentPlanner.query.filter_by(user_id=current_user.id).count()
@@ -97,13 +121,15 @@ def planner():
     return render_template('planner.html', user=current_user, total_planners=total_planners)
 
 
-@views.route('/planner-history', methods=['GET'])
+@views.route('/planner-history/<int:user_id>', methods=['GET'])
 @login_required
-def planner_history():
-    planners = StudentPlanner.query.filter_by(user_id=current_user.id).all()
+def planner_history(user_id):
+    planners = StudentPlanner.query.filter_by(user_id=user_id).all()
     for planner in planners:
-        planner.tasks = PlannerTask.query.filter_by(student_planner_id=planner.id).all()  # Explicitly fetch tasks
-    return render_template('planner_history.html', user=current_user, planners=planners)
+        planner.tasks = PlannerTask.query.filter_by(student_planner_id=planner.id).all()
+
+    user = User.query.get(user_id)  # Fetch the user to display their name
+    return render_template('planner_history.html', user=current_user, planners=planners, student_user=user)
 
 
 @views.route('/planner/<int:planner_id>', methods=['GET'])
@@ -112,18 +138,21 @@ def view_planner(planner_id):
     planner = StudentPlanner.query.filter_by(id=planner_id, user_id=current_user.id).first()
     if not planner:
         flash('Planner not found or access denied.', category='error')
-        return redirect(url_for('views.planner_history'))
+        return redirect(url_for('views.planner_history', user_id=current_user.id))
 
     tasks = PlannerTask.query.filter_by(student_planner_id=planner.id).all()
     return render_template('view_planner.html', planner=planner, tasks=tasks)
 
-@views.route('/delete-planner/<int:planner_id>', methods=['POST'])
+
+@views.route('/delete-planner/<int:planner_id>/<int:user_id>', methods=['POST'])
 @login_required
-def delete_planner(planner_id):
-    planner = StudentPlanner.query.filter_by(id=planner_id, user_id=current_user.id).first()
-    if not planner:
+def delete_planner(planner_id, user_id):
+    planner = StudentPlanner.query.filter_by(id=planner_id, user_id=user_id).first()
+    
+    # Check if the planner exists and if the user has permission
+    if not planner or (current_user.role == 'student' and planner.user_id != current_user.id):
         flash('Planner not found or you do not have permission to delete it.', category='error')
-        return redirect(url_for('views.planner_history'))
+        return redirect(url_for('views.planner_history', user_id=user_id))
 
     # Delete all associated tasks
     PlannerTask.query.filter_by(student_planner_id=planner_id).delete()
@@ -132,7 +161,10 @@ def delete_planner(planner_id):
     db.session.delete(planner)
     db.session.commit()
     flash('Planner deleted successfully!', category='success')
-    return redirect(url_for('views.planner_history'))
+    
+    # Redirect back to the same student's planner history page
+    return redirect(url_for('views.planner_history', user_id=user_id))
+
 
 
 
@@ -344,3 +376,14 @@ def edit_task(id):
     flash("Task updated successfully!", category="success")
 
     return redirect(url_for('views.todo'))
+
+@views.route('/teachers', methods=['GET'])
+@login_required
+def teachers():
+    if current_user.role != 'teacher':
+        flash("Access denied. Only teachers can view this page.", category="error")
+        return redirect(url_for('views.home'))
+
+    # Query only users with the role of 'student' and order by fullname
+    users = User.query.filter_by(role='student').order_by(func.lower(User.fullname)).all()
+    return render_template('teachers.html', users=users)

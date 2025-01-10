@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Create Planner{% endblock %}
+{% block title %}Weekly Planner{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -8,7 +8,7 @@
     <div class="col-lg-8">
       <div class="card shadow p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h3 class="text-primary">Create a Student Planner</h3>
+          <h3 class="text-primary">Create a Weekly Student Planner</h3>
           <div class="streak-badge bg-warning text-dark rounded-pill px-3 py-1" style="font-weight: bold; font-size: 1.2rem;">
             🔥 Total Planners: {{ total_planners }} 
           </div>
@@ -24,7 +24,7 @@
           <!-- Start Date -->
           <div class="form-group mb-3">
             <label for="start_date" class="form-label">Start Date</label>
-            <input type="date" class="form-control" id="start_date" name="start_date" required>
+            <input type="date" class="form-control" id="start_date" name="start_date" required onchange="setFirstDay()">
           </div>
 
           <!-- End Date -->
@@ -39,7 +39,7 @@
             <div id="tasks-section">
               <div class="task-item d-flex align-items-center mb-2">
                 <input type="text" class="form-control" name="tasks" placeholder="Task description" required>
-                <select class="form-select ms-2" name="days" required>
+                <select class="form-select ms-2" name="days" id="days-select" required>
                   <option value="Monday">Monday</option>
                   <option value="Tuesday">Tuesday</option>
                   <option value="Wednesday">Wednesday</option>
@@ -56,8 +56,8 @@
 
           <!-- Action Buttons -->
           <div class="d-flex justify-content-between">
+            <a href="{{ url_for('views.planner_history', user_id=current_user.id) }}" class="btn btn-info">View Planner History</a>
             <button type="submit" class="btn btn-primary">Submit Planner</button>
-            <a href="{{ url_for('views.planner_history') }}" class="btn btn-info">View Planner History</a>
           </div>
         </form>
       </div>
@@ -66,12 +66,35 @@
 </div>
 
 <script>
+  // Function to set the first day of tasks based on the selected start date
+  function setFirstDay() {
+    const startDateInput = document.getElementById('start_date').value;
+    if (startDateInput) {
+      const startDate = new Date(startDateInput);
+      const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const firstDay = daysOfWeek[startDate.getDay()];
+
+      const firstTaskDaySelect = document.querySelector('.task-item select');
+      if (firstTaskDaySelect) {
+        firstTaskDaySelect.innerHTML = ''; // Clear existing options
+        firstTaskDaySelect.innerHTML = `<option value="${firstDay}" selected>${firstDay}</option>`;
+        daysOfWeek.forEach(day => {
+          if (day !== firstDay) {
+            firstTaskDaySelect.innerHTML += `<option value="${day}">${day}</option>`;
+          }
+        });
+      }
+    }
+  }
+
+  // Clone task item and append it to the tasks section
   document.getElementById('add-task').addEventListener('click', function() {
     const taskItem = document.querySelector('.task-item').cloneNode(true);
     taskItem.querySelector('input').value = '';
     document.getElementById('tasks-section').appendChild(taskItem);
   });
 
+  // Remove task item when clicking the remove button
   document.getElementById('tasks-section').addEventListener('click', function(e) {
     if (e.target.classList.contains('remove-task')) {
       e.target.closest('.task-item').remove();

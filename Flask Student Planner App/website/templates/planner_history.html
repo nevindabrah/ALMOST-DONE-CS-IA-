@@ -39,7 +39,7 @@
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                          <form method="POST" action="{{ url_for('views.delete_planner', planner_id=planner.id) }}">
+                          <form method="POST" action="{{ url_for('views.delete_planner', planner_id=planner.id, user_id=student_user.id) }}">
                             <button type="submit" class="btn btn-danger">Delete</button>
                           </form>
                         </div>
@@ -62,8 +62,19 @@
             {% endfor %}
           </div>
         {% else %}
-          <p>No planners found. <a href="{{ url_for('views.planner') }}" class="btn btn-primary">Create one now</a>.</p>
+          <p>No planners found.</p>
+          {% if current_user.role == 'student' and current_user.id == student_user.id %}
+            <a href="{{ url_for('views.planner') }}" class="btn btn-primary mt-3">Create one now</a>
+          {% endif %}
         {% endif %}
+
+        <!-- Back to Plan Tracker button for teachers -->
+        {% if current_user.role == 'teacher' %}
+          <div class="d-flex justify-content-center mt-4">
+            <a href="{{ url_for('views.teachers') }}" class="btn btn-secondary rounded-pill px-4">Back to Plan Tracker</a>
+          </div>
+        {% endif %}
+        
       </div>
     </div>
   </div>

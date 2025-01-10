@@ -7,7 +7,6 @@
     <div class="card shadow-lg border-0 p-4" style="max-width: 500px; width: 100%;">
         <h3 class="text-center text-primary mb-4">Sign Up</h3>
         <form method="POST" id="signupForm">
-            <!-- Email Field -->
             <div class="form-group mb-3 position-relative">
                 <label for="email" class="form-label fw-bold">Email</label>
                 <div class="input-group">
@@ -22,7 +21,6 @@
                 </div>
             </div>
 
-            <!-- Full Name Field -->
             <div class="form-group mb-3 position-relative">
                 <label for="fullname" class="form-label fw-bold">Full Name</label>
                 <div class="input-group">
@@ -37,7 +35,16 @@
                 </div>
             </div>
 
-            <!-- Password Field -->
+            <div class="form-group mb-3">
+                <label class="form-label fw-bold">Select Role</label>
+                <div class="d-flex justify-content-center gap-3 mt-2">
+                    <button type="button" class="btn btn-outline-primary role-btn" data-role="student">Student</button>
+                    <button type="button" class="btn btn-outline-primary role-btn" data-role="teacher">Teacher</button>
+                </div>
+                <input type="hidden" id="role" name="role" required>
+                <div id="roleError" class="text-danger mt-2 d-none">Please select a role.</div>
+            </div>
+
             <div class="form-group mb-3 position-relative">
                 <label for="password1" class="form-label fw-bold">Password</label>
                 <div class="input-group">
@@ -55,7 +62,6 @@
                 </div>
             </div>
 
-            <!-- Confirm Password Field -->
             <div class="form-group mb-4 position-relative">
                 <label for="password2" class="form-label fw-bold">Confirm Password</label>
                 <div class="input-group">
@@ -73,7 +79,6 @@
                 </div>
             </div>
 
-            <!-- Submit Button -->
             <div class="d-grid gap-2">
                 <button
                     type="submit"
@@ -85,7 +90,6 @@
                 </button>
             </div>
 
-            <!-- Login Link -->
             <div class="text-center mt-3">
                 <span class="text-muted">Have an account already?</span>
                 <a href="{{ url_for('auth.login') }}" class="text-primary fw-bold">Login</a>
@@ -94,7 +98,6 @@
     </div>
 </div>
 
-<!-- JavaScript -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const emailInput = document.getElementById("email");
@@ -104,8 +107,19 @@
         const spinner = document.getElementById("spinner");
         const togglePassword1 = document.getElementById("togglePassword1");
         const togglePassword2 = document.getElementById("togglePassword2");
+        const roleButtons = document.querySelectorAll(".role-btn");
+        const roleInput = document.getElementById("role");
+        const roleError = document.getElementById("roleError");
 
-        // Email Validation
+        roleButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                roleInput.value = this.getAttribute("data-role");
+                roleButtons.forEach(btn => btn.classList.remove("active", "btn-primary"));
+                this.classList.add("active", "btn-primary");
+                roleError.classList.add("d-none");
+            });
+        });
+
         emailInput.addEventListener("input", function () {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (emailRegex.test(emailInput.value)) {
@@ -117,7 +131,6 @@
             }
         });
 
-        // Password Validation
         password1Input.addEventListener("input", function () {
             if (password1Input.value.length >= 6) {
                 password1Input.classList.remove("is-invalid");
@@ -128,7 +141,6 @@
             }
         });
 
-        // Confirm Password Validation
         password2Input.addEventListener("input", function () {
             if (password2Input.value === password1Input.value && password2Input.value.length >= 6) {
                 password2Input.classList.remove("is-invalid");
@@ -139,7 +151,6 @@
             }
         });
 
-        // Toggle Password Visibility
         togglePassword1.addEventListener("click", function () {
             const isPasswordVisible = password1Input.getAttribute("type") === "text";
             password1Input.setAttribute("type", isPasswordVisible ? "password" : "text");
@@ -154,14 +165,17 @@
             togglePassword2.classList.toggle("fa-eye-slash", !isPasswordVisible);
         });
 
-        // Add Spinner on Sign Up Button Click
         signupButton.addEventListener("click", function (e) {
             const isEmailValid = emailInput.classList.contains("is-valid");
             const isPassword1Valid = password1Input.classList.contains("is-valid");
             const isPassword2Valid = password2Input.classList.contains("is-valid");
+            const isRoleSelected = roleInput.value !== "";
 
-            if (!isEmailValid || !isPassword1Valid || !isPassword2Valid) {
+            if (!isEmailValid || !isPassword1Valid || !isPassword2Valid || !isRoleSelected) {
                 e.preventDefault();
+                if (!isRoleSelected) {
+                    roleError.classList.remove("d-none");
+                }
                 return;
             }
 

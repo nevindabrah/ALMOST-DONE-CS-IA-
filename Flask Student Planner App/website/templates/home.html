@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}
-Dashboard
-{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
 <div class="container py-3">
@@ -10,22 +8,35 @@ Dashboard
     <h1 class="text-primary text-center" style="font-size: 2rem; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;">
       Welcome, {{ user.fullname }}!
     </h1>
-    <div class="streak-badge bg-warning text-dark rounded-pill px-3 py-1" style="font-weight: bold; font-size: 1.2rem;">
-      🔥 Total Planners: {{ total_planners }}
-    </div>
+    {% if user.role == 'student' %}
+      <div class="streak-badge bg-warning text-dark rounded-pill px-3 py-1" style="font-weight: bold; font-size: 1.2rem;">
+        🔥 Total Planners: {{ total_planners }}
+      </div>
+    {% endif %}
   </div>
 
-  <!-- Weekly Planner Section -->
+  <!-- Top Section Card -->
   <div class="card shadow mb-3" style="background: linear-gradient(to right, #6a11cb, #2575fc); color: white;">
     <div class="card-body text-center py-3">
-      <div class="d-flex justify-content-center align-items-center">
-        <i class="fas fa-calendar-alt fa-3x me-3"></i>
-        <div>
-          <h4 class="card-title mb-2">Your Weekly Planner</h4>
-          <p class="small">Plan your week, set goals, and stay on track with ease!</p>
+      {% if user.role == 'student' %}
+        <div class="d-flex justify-content-center align-items-center">
+          <i class="fas fa-calendar-alt fa-3x me-3"></i>
+          <div>
+            <h3 class="card-title mb-3" style="font-size: 1.8rem; font-weight: bold;">Your Weekly Planner</h3>
+            <p class="small">Plan your week, set goals, and stay on track with ease!</p>
+          </div>
         </div>
-      </div>
-      <a href="/planner" class="btn btn-light btn-lg mt-3 planner-btn" style="color: #2575fc; font-weight: bold;">Go to Planner</a>
+        <a href="/planner" class="btn btn-light mt-3" style="color: #2575fc; font-weight: bold; padding: 8px 20px; font-size: 1rem;">Go to Planner</a>
+      {% elif user.role == 'teacher' %}
+        <div class="d-flex justify-content-center align-items-center">
+          <i class="fas fa-user-graduate fa-3x me-3"></i>
+          <div>
+            <h3 class="card-title mb-3" style="font-size: 1.8rem; font-weight: bold;">Teacher Dashboard</h3>
+            <p class="small">Keep an eye on your students' planning progress and help them stay on track!</p>
+          </div>
+        </div>
+        <a href="/teachers" class="btn btn-light mt-3" style="color: #2575fc; font-weight: bold; padding: 8px 20px; font-size: 1rem;">Monitor Student Planners</a>
+      {% endif %}
     </div>
   </div>
 
@@ -44,19 +55,30 @@ Dashboard
       </div>
     </div>
 
-    <!-- Timetable & Notes -->
+    <!-- Timetable & Notes for Students / Student Count for Teachers -->
     <div class="col-md-4">
-      <div class="card shadow text-center p-2 card-reduced" style="border: 1px solid #2575fc;">
-        <div class="card-body">
-          <h5 class="card-title text-primary mb-2">Timetable & Notes</h5>
-          <h6 class="mb-2">Timetable Images: <span class="badge bg-info text-dark">{{ images_total }}</span></h6>
-          <h6 class="mb-3">Notes: <span class="badge bg-primary text-light">{{ notes_total }}</span></h6>
-          <div class="d-flex justify-content-center gap-2">
-            <a href="/timetable" class="btn btn-info btn-sm">Manage Timetable(s)</a>
-            <a href="/notes" class="btn btn-primary btn-sm">View Notes</a>
-          </div>
-        </div>
+      {% if user.role == 'student' %}
+  <div class="card shadow text-center p-2 card-reduced" style="border: 1px solid #2575fc;">
+    <div class="card-body">
+      <h5 class="card-title text-primary mb-2">Timetable & Notes</h5>
+      <h6 class="mb-2">Timetable Images: <span class="badge bg-info text-dark">{{ images_total }}</span></h6>
+      <h6 class="mb-3">Notes: <span class="badge bg-primary text-light">{{ notes_total }}</span></h6>
+      <div class="d-flex justify-content-center gap-2">
+        <a href="/timetable" class="btn btn-info btn-sm" style="padding: 6px 12px; font-size: 0.9rem;">Manage Timetable(s)</a>
+        <a href="/notes" class="btn btn-primary btn-sm" style="padding: 6px 12px; font-size: 0.9rem;">View Notes</a>
       </div>
+    </div>
+  </div>
+{% elif user.role == 'teacher' %}
+  <div class="card shadow text-center p-2 card-reduced" style="border: 1px solid #2575fc;">
+    <div class="card-body">
+      <h5 class="card-title text-primary mb-2">Student Count</h5>
+      <h6 class="mb-3">You currently have <span class="badge bg-info text-dark">{{ total_students }}</span> students.</h6>
+      <a href="/teachers" class="btn btn-primary btn-sm mt-2" style="padding: 8px 20px; font-size: 1rem;">Check Student Planners</a>
+    </div>
+  </div>
+{% endif %}
+
     </div>
 
     <!-- Motivational Quotes -->
@@ -76,26 +98,31 @@ Dashboard
 
 <style>
   .planner-btn {
-    font-size: 1.5rem; /* Keeps the "Go to Planner" button large */
-    padding: 10px 30px;
+    font-size: 1.5rem;
+    padding: 8px 20px;
   }
 
   .card-reduced {
-    min-height: 220px; /* Reduced height for bottom cards */
-    padding: 1rem; /* Compact padding */
+    min-height: 220px;
+    padding: 1rem;
   }
 
   .card-title {
-    font-size: 1.1rem; /* Slightly smaller title for uniform appearance */
+    font-size: 1.8rem;
+    font-weight: bold;
   }
 
   .card-text {
-    font-size: 0.9rem; /* Reduces font size for text content */
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    font-size: 1rem;
+    padding: 8px 20px;
   }
 </style>
 
 <script>
-  // Quotes array
   const quotes = [
     "A goal without a plan is just a wish.",
     "Plans are nothing; planning is everything.",
@@ -108,7 +135,6 @@ Dashboard
     "A little planning ahead saves a lot of time later."
   ];
 
-  // Rotate quotes automatically
   let currentQuoteIndex = 0;
   function rotateQuote() {
     currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;

@@ -23,7 +23,6 @@
           </form>
         </div>
 
-        <!-- Show the current sorting method -->
         {% if sort_by %}
           <p class="text-muted">Sorted by: <strong>{{ sort_by.replace('_', ' ').capitalize() }}</strong></p>
         {% endif %}
@@ -45,9 +44,9 @@
               placeholder="Deadline (optional)"
             />
             <select name="priority" class="form-select">
-              <option value="High">High</option>
-              <option value="Medium" selected>Medium</option>
-              <option value="Low">Low</option>
+              <option value="High">High Priority</option>
+              <option value="Medium" selected>Medium Priority</option>
+              <option value="Low">Low Priority</option>
             </select>
             <button type="submit" class="btn btn-primary">Add</button>
           </div>
@@ -56,7 +55,6 @@
         <!-- Task List -->
         <ul class="list-group">
           {% for task in tasks %}
-
           <li class="list-group-item d-flex justify-content-between align-items-center" id="task-{{ task.id }}">
             <div>
               <input type="checkbox" {% if task.completed %}checked{% endif %} onchange="toggleTask({{ task.id }})" />
@@ -72,50 +70,47 @@
                 {% endif %}
               </p>
               <p class="mb-0 small">
-                Priority: <span class="badge {% if task.priority == 'High' %}bg-danger{% elif task.priority == 'Medium' %}bg-warning{% else %}bg-success{% endif %}">
+                Priority:
+                <span class="badge {% if task.priority == 'High' %}bg-danger{% elif task.priority == 'Medium' %}bg-warning{% else %}bg-success{% endif %}">
                   {{ task.priority }}
                 </span>
               </p>
               <p class="mb-0 small">
-                Status: <span class="task-status {% if task.completed %}text-success{% else %}text-warning{% endif %}">
+                Status:
+                <span class="task-status {% if task.completed %}text-success{% else %}text-warning{% endif %}">
                   {% if task.completed %}Complete{% else %}In Progress{% endif %}
                 </span>
               </p>
             </div>
 
             <div>
-              <!-- Edit Button -->
               <a href="#" data-toggle="modal" data-target="#editTaskModal-{{ task.id }}" class="btn btn-info btn-sm">Edit</a>
-
-              <!-- Delete Button -->
               <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteTaskModal-{{ task.id }}">Delete</button>
             </div>
           </li>
 
-         <!-- Modal for Deleting Task -->
-<div class="modal fade" id="deleteTaskModal-{{ task.id }}" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <form action="{{ url_for('views.delete_task', id=task.id) }}" method="POST">
-      <div class="modal-content">
-        <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title">Confirm Delete</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: black;">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>Are you sure you want to delete the task <strong>{{ task.task }}</strong>?</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger">Delete</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-
-
+          <!-- Modal for Deleting Task -->
+          <div class="modal fade" id="deleteTaskModal-{{ task.id }}" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+              <form action="{{ url_for('views.delete_task', id=task.id) }}" method="POST">
+                <div class="modal-content">
+                  <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: black;">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Are you sure you want to delete the task <strong>{{ task.task }}</strong>?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
 
           <!-- Modal for Editing Task -->
           <div class="modal fade" id="editTaskModal-{{ task.id }}" tabindex="-1" role="dialog">
@@ -129,15 +124,12 @@
                     </button>
                   </div>
                   <div class="modal-body">
-                    <!-- Task Title -->
                     <input type="text" name="task" value="{{ task.task }}" class="form-control mb-3" required />
-                    <!-- Due Date -->
                     <input type="date" name="due_date" value="{{ task.due_date }}" class="form-control" />
-                    <!-- Priority -->
                     <select name="priority" class="form-select">
-                      <option value="High" {% if task.priority == 'High' %}selected{% endif %}>High</option>
-                      <option value="Medium" {% if task.priority == 'Medium' %}selected{% endif %}>Medium</option>
-                      <option value="Low" {% if task.priority == 'Low' %}selected{% endif %}>Low</option>
+                      <option value="High" {% if task.priority == 'High' %}selected{% endif %}>High Priority</option>
+                      <option value="Medium" {% if task.priority == 'Medium' %}selected{% endif %}>Medium Priority</option>
+                      <option value="Low" {% if task.priority == 'Low' %}selected{% endif %}>Low Priority</option>
                     </select>
                   </div>
                   <div class="modal-footer">
@@ -159,38 +151,33 @@
             );
           }
 
+          function toggleTask(id) {
+            fetch(`/toggle-task/${id}`, { method: "POST" })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  const taskTitle = document.querySelector(`#task-${id} .task-title`);
+                  const statusElement = document.querySelector(`#task-${id} .task-status`);
+
+                  if (taskTitle) {
+                    taskTitle.classList.toggle("text-decoration-line-through", data.completed);
+                  }
+
+                  if (statusElement) {
+                    statusElement.textContent = data.completed ? "Complete" : "In Progress";
+                    statusElement.classList.remove("text-success", "text-warning");
+                    statusElement.classList.add(data.completed ? "text-success" : "text-warning");
+                  }
+                } else {
+                  console.error("Failed to toggle task:", data.error || "Unknown error");
+                }
+              })
+              .catch(error => console.error("Error:", error));
+          }
         </script>
-        <script>
-  function toggleTask(id) {
-    fetch(`/toggle-task/${id}`, { method: "POST" })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          const taskTitle = document.querySelector(`#task-${id} .task-title`);
-          const statusElement = document.querySelector(`#task-${id} .task-status`);
-
-          if (taskTitle) {
-            // Toggle strikethrough on the task title
-            taskTitle.classList.toggle("text-decoration-line-through", data.completed);
-          }
-
-          if (statusElement) {
-            // Update the status text and styling dynamically
-            statusElement.textContent = data.completed ? "Complete" : "In Progress";
-            statusElement.classList.remove("text-success", "text-warning");
-            statusElement.classList.add(data.completed ? "text-success" : "text-warning");
-          }
-        } else {
-          console.error("Failed to toggle task:", data.error || "Unknown error");
-        }
-      })
-      .catch(error => console.error("Error:", error));
-  }
-</script>
 
       </div>
     </div>
   </div>
 </div>
-
 {% endblock %}

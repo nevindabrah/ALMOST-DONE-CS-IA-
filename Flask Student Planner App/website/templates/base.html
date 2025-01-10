@@ -51,17 +51,40 @@
       </label>
       <ul>
         {% if current_user.is_authenticated %}
-        <li><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li><a href="/planner">Planner</a></li> <!-- Added Planner link -->
-        <li><a href="/todo">To-Do List</a></li>
-        <li><a href="/timetable">Timetable</a></li>
-        <li><a href="/notes">Reflections and Notes</a></li>
-        <li><a href="/logout">Logout</a></li>
+            <!-- Home (for all) -->
+            <li><a href="/"><i class="fa fa-home"></i> Home</a></li>
+            
+            <!-- Planner (for students only) -->
+            {% if current_user.role == 'student' %}
+                <li><a href="/planner">Planner</a></li>
+            {% endif %}
+            
+            <!-- Teachers (for teachers only) -->
+            {% if current_user.role == 'teacher' %}
+                <li><a href="/teachers">Plan Tracker</a></li>
+            {% endif %}
+            
+            <!-- To-Do List (for all) -->
+            <li><a href="/todo">To-Do List</a></li>
+            
+            <!-- Timetable (for all) -->
+            <li><a href="/timetable">Timetable</a></li>
+            
+            <!-- Reflections and Notes (for students only) -->
+            {% if current_user.role == 'student' %}
+                <li><a href="/notes">Reflections and Notes</a></li>
+            {% endif %}
+            
+            <!-- Logout (for all) -->
+            <li><a href="/logout">Logout</a></li>
         {% else %}
-        <li><a href="/login">Login</a></li>
-        <li><a href="/signup">Sign Up</a></li>
+            <!-- Login and Sign Up (for unauthenticated users) -->
+            <li><a href="/login">Login</a></li>
+            <li><a href="/signup">Sign Up</a></li>
         {% endif %}
-      </ul>
+    </ul>
+    
+    
     </nav>
 
     <!-- Flashed messages will appear below the navigation bar -->
