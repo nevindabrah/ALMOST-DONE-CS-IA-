@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}To-Do List{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow p-4">
+        <h3 class="text-center text-primary">My Tasks</h3>
+
+        <!-- Task Sorting Filters -->
+        <div class="mb-3 d-flex justify-content-end">
+          <form id="sort-form">
+            <label for="sort_by" class="me-2">Sort By:</label>
+            <select name="sort_by" id="sort_by" class="form-select d-inline-block w-auto me-2">
+              <option value="date_created">Date Created</option>
+              <option value="status">Status</option>
+              <option value="due_date">Due Date</option>
+              <option value="priority">Priority</option>
+            </select>
+            <button type="button" class="btn btn-secondary" onclick="sortTasks()">Sort</button>
+          </form>
+        </div>
+
+        {% if sort_by %}
+          <p class="text-muted">Sorted by: <strong>{{ sort_by.replace('_', ' ').capitalize() }}</strong></p>
+        {% endif %}
+
+        <!-- Task Creation Form -->
+        <form id="add-task-form">
+          <div class="input-group mb-3">
+            <input
+              type="text"
+              id="task"
+              name="task"
+              class="form-control"
+              placeholder="Add new task..."
+              required
+            />
+            <input
+              type="date"
+              id="due_date"
+              name="due_date"
+              class="form-control"
+              placeholder="Deadline (optional)"
+            />
+            <select id="priority" name="priority" class="form-select">
+              <option value="High">High Priority</option>
+              <option value="Medium" selected>Medium Priority</option>
+              <option value="Low">Low Priority</option>
+            </select>
+            <button type="button" class="btn btn-primary" onclick="addTask()">Add</button>
+          </div>
+        </form>
+
+        <!-- Task List -->
+        <ul class="list-group" id="task-list">
+          {% for task in tasks %}
+          <li class="list-group-item d-flex justify-content-between align-items-center" id="task-{{ task.id }}">
+            <div>
+              <input type="checkbox" {% if task.completed %}checked{% endif %} onchange="toggleTask({{ task.id }})" />
+              <span class="task-title {% if task.completed %}text-decoration-line-through{% endif %}">
+                {{ task.task }}
+              </span>
+              <p class="mb-0 small text-muted">
+                {% if task.due_date %}
+                  <strong>Due:</strong> 
+                  <span 
+                    style="font-weight: bold; {% if task.due_date <= now.date() %}color: red;{% endif %}">
+                    {{ task.due_date.strftime('%d/%m/%Y') }}
+                  </span>
+                  ({% if task.due_date > now.date() %}{{ (task.due_date - now.date()).days }} days left{% else %}<strong>Overdue</strong>{% endif %})
+                {% else %}
+                  No deadline set
+                {% endif %}
+              </p>
+              <p class="mb-0 small">
+                Priority:
+                <span class="badge {% if task.priority == 'High' %}bg-danger{% elif task.priority == 'Medium' %}bg-warning{% else %}bg-success{% endif %}">
+                  {{ task.priority }}
+                </span>
+              </p>
+              <p class="mb-0 small">
+                Status:
+                <span class="task-status {% if task.completed %}text-success{% else %}text-warning{% endif %}">
+                  {% if task.completed %}Complete{% else %}In Progress{% endif %}
+                </span>
+              </p>
+            </div>
+
+            <div>
+              <a href="#" data-toggle="modal" data-target="#editTaskModal-{{ task.id }}" class="btn btn-info btn-sm">Edit</a>
+              <button class="btn btn-danger btn-sm" onclick="deleteTask({{ task.id }})">Delete</button>
+            </div>
+          </li>
+
+          <!-- Modal for Editing Task -->
+          <div class="modal fade" id="editTaskModal-{{ task.id }}" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Edit Task</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <input type="text" id="edit-task-{{ task.id }}" value="{{ task.task }}" class="form-control mb-3" required />
+                  <input type="date" id="edit-due_date-{{ task.id }}" value="{{ task.due_date }}" class="form-control" />
+                  <select id="edit-priority-{{ task.id }}" class="form-select">
+                    <option value="High" {% if task.priority == 'High' %}selected{% endif %}>High Priority</option>
+                    <option value="Medium" {% if task.priority == 'Medium' %}selected{% endif %}>Medium Priority</option>
+                    <option value="Low" {% if task.priority == 'Low' %}selected{% endif %}>Low Priority</option>
+                  </select>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                  <button type="button" class="btn btn-primary" onclick="editTask({{ task.id }})">Save Changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </ul>
+
+        <!-- AJAX Scripts -->
+        <script>
+          // Add Task
+          async function addTask() {
+            const task = document.querySelector("#task").value;
+            const dueDate = document.querySelector("#due_date").value;
+            const priority = document.querySelector("#priority").value;
+
+            const response = await fetch("/add-task", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ task, due_date: dueDate, priority }),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+              location.reload(); // Reload dynamically if necessary
+            } else {
+              alert(result.error || "Failed to add task!");
+            }
+          }
+
+          // Delete Task
+          async function deleteTask(id) {
+            const response = await fetch(`/delete-task/${id}`, { method: "POST" });
+            const result = await response.json();
+            if (result.success) {
+              document.getElementById(`task-${id}`).remove();
+            } else {
+              alert(result.error || "Failed to delete task!");
+            }
+          }
+
+          // Toggle Task Completion
+          async function toggleTask(id) {
+            const response = await fetch(`/toggle-task/${id}`, { method: "POST" });
+            const result = await response.json();
+            if (result.success) {
+              const taskElement = document.getElementById(`task-${id}`);
+              const title = taskElement.querySelector(".task-title");
+              const status = taskElement.querySelector(".task-status");
+
+              if (title) {
+                title.classList.toggle("text-decoration-line-through", result.completed);
+              }
+
+              if (status) {
+                status.textContent = result.completed ? "Complete" : "In Progress";
+                status.classList.remove("text-success", "text-warning");
+                status.classList.add(result.completed ? "text-success" : "text-warning");
+              }
+            }
+          }
+
+          // Edit Task
+          async function editTask(id) {
+            const task = document.querySelector(`#edit-task-${id}`).value;
+            const dueDate = document.querySelector(`#edit-due_date-${id}`).value;
+            const priority = document.querySelector(`#edit-priority-${id}`).value;
+
+            const response = await fetch(`/edit-task/${id}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ task, due_date: dueDate, priority }),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+              location.reload(); // Optionally reload or dynamically update the task
+            } else {
+              alert(result.error || "Failed to edit task!");
+            }
+          }
+
+          // Sort Tasks
+          function sortTasks() {
+            const sortBy = document.querySelector("#sort_by").value;
+            window.location.href = `/todo?sort_by=${sortBy}`;
+          }
+        </script>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

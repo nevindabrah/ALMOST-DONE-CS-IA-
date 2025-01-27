@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Teachers{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="text-primary">Student Planners</h3>
+          <div class="streak-badge bg-warning text-dark rounded-pill px-3 py-1" style="font-weight: bold; font-size: 1.2rem;">
+            🧑‍🎓 Total Students: {{ users|length }}
+          </div>
+        </div>
+
+        <table class="table table-bordered table-hover text-center align-middle">
+          <thead style="background: linear-gradient(to right, #d3d3d3, #e8e8e8); color: black;">
+            <tr>
+              <th>Student Name</th>
+              <th>Planner History</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ user.fullname }}</td>
+              <td>
+                <a href="{{ url_for('views.planner_history', user_id=user.id) }}" class="btn btn-primary btn-sm">
+                  Check Planners
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="d-flex justify-content-center mt-4">
+          <a href="{{ url_for('views.home') }}" class="btn btn-secondary rounded-pill px-4">Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  table {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  th, td {
+    vertical-align: middle;
+    text-transform: capitalize;
+    font-size: 1rem;
+  }
+
+  th {
+    font-weight: bold;
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: #f3f9ff;
+  }
+
+  .btn {
+    font-weight: bold;
+  }
+
+  .streak-badge {
+    font-size: 1.1rem;
+  }
+</style>
+{% endblock %}

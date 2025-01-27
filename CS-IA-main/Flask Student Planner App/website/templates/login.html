@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container py-5 d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg border-0 p-4" style="max-width: 500px; width: 100%;">
+        <h3 class="text-center text-primary mb-4">Login</h3>
+        <form method="POST" id="loginForm">
+            <!-- Email Field -->
+            <div class="form-group mb-3 position-relative">
+                <label for="email" class="form-label fw-bold">Email</label>
+                <div class="input-group">
+                    <input
+                        type="email"
+                        class="form-control rounded-pill"
+                        id="email"
+                        name="email"
+                        placeholder="example@gmail.com"
+                        required
+                    />
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group mb-4 position-relative">
+                <label for="password" class="form-label fw-bold">Password</label>
+                <div class="input-group">
+                    <input
+                        type="password"
+                        class="form-control rounded-pill"
+                        id="password"
+                        name="password"
+                        placeholder="Enter Password"
+                        required
+                    />
+                    <span class="position-absolute end-0 me-5 top-50 translate-middle-y" style="cursor: pointer;">
+                        <i class="fas fa-eye" id="togglePassword"></i>
+                    </span>
+                </div>
+                <div id="passwordError" class="text-danger mt-2 d-none">Password must be at least 7 characters long.</div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid gap-2">
+                <button
+                    type="submit"
+                    id="loginButton"
+                    class="btn btn-primary rounded-pill btn-lg d-flex align-items-center justify-content-center"
+                >
+                    <span>Login</span>
+                    <span id="spinner" class="spinner-border spinner-border-sm text-light ms-2 d-none" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+
+            <!-- Signup Link -->
+            <div class="text-center mt-3">
+                <span class="text-muted">Don't have an account?</span>
+                <a href="{{ url_for('auth.signup') }}" class="text-primary fw-bold">Sign Up</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const passwordError = document.getElementById("passwordError");
+        const loginButton = document.getElementById("loginButton");
+        const spinner = document.getElementById("spinner");
+        const togglePassword = document.getElementById("togglePassword");
+
+        // Email Validation
+        emailInput.addEventListener("input", function () {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(emailInput.value)) {
+                emailInput.classList.remove("is-invalid");
+                emailInput.classList.add("is-valid");
+            } else {
+                emailInput.classList.remove("is-valid");
+                emailInput.classList.add("is-invalid");
+            }
+        });
+
+        // Password Validation
+        passwordInput.addEventListener("input", function () {
+            if (passwordInput.value.length >=7) {
+                passwordInput.classList.remove("is-invalid");
+                passwordInput.classList.add("is-valid");
+                passwordError.classList.add("d-none");
+            } else {
+                passwordInput.classList.remove("is-valid");
+                passwordInput.classList.add("is-invalid");
+                passwordError.classList.remove("d-none");
+            }
+        });
+
+        // Toggle Password Visibility
+        togglePassword.addEventListener("click", function () {
+            const isPasswordVisible = passwordInput.getAttribute("type") === "text";
+            passwordInput.setAttribute("type", isPasswordVisible ? "password" : "text");
+            togglePassword.classList.toggle("fa-eye", isPasswordVisible);
+            togglePassword.classList.toggle("fa-eye-slash", !isPasswordVisible);
+        });
+
+        // Add Spinner on Login Button Click
+        loginButton.addEventListener("click", function (e) {
+            const isEmailValid = emailInput.classList.contains("is-valid");
+            const isPasswordValid = passwordInput.classList.contains("is-valid");
+
+            if (!isEmailValid || !isPasswordValid) {
+                e.preventDefault();
+                return;
+            }
+
+            spinner.classList.remove("d-none");
+        });
+    });
+</script>
+{% endblock %}

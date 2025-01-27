@@ -1,0 +1,311 @@
+* {
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+  list-style: none;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Ubuntu", sans-serif;
+}
+
+nav {
+  background: #0082e6;
+  height: 80px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.book-icon {
+  color: white;
+  font-size: 24px;
+  margin-left: 20px;
+  text-decoration: none;
+}
+
+.book-icon:hover {
+  color: white;
+  background: none;
+  text-decoration: none; /* Ensure no underline on hover */
+}
+
+a.logo {
+  color: white;
+  font-size: 35px;
+  line-height: 80px;
+  padding-left: 10px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a.logo:hover {
+  color: white;
+  background: none;
+  text-decoration: none; /* Ensure no underline on hover */
+}
+
+nav ul {
+  margin-left: auto;
+  margin-right: 20px;
+}
+
+nav ul li {
+  display: inline-block;
+  line-height: 80px;
+  margin: 0 5px;
+}
+
+nav ul li a {
+  color: white;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+a.active,
+a:hover {
+  background: #ffffff;
+  color: #0082e6;
+  transition: 0.5s;
+  border-radius: 15px;
+  text-decoration: none; /* Ensure no underline on hover */
+}
+
+.checkbtn {
+  font-size: 30px;
+  color: white;
+  float: right;
+  line-height: 80px;
+  margin-right: 20px;
+  cursor: pointer;
+  display: none;
+}
+
+#check {
+  display: none;
+}
+
+@media (max-width: 858px) {
+  .checkbtn {
+    display: block;
+    position: absolute;
+    top: 0px; /* Align with the navbar */
+    right: 20px; /* Place in the top-right corner */
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+  }
+
+  nav ul {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    background: #2c3e50;
+    top: 80px;
+    left: -100%;
+    text-align: center;
+    transition: all 1s;
+    z-index: 999;
+  }
+
+  #check:checked ~ ul {
+    left: 0;
+  }
+
+  nav ul li {
+    display: block;
+    margin: 50px;
+    line-height: 30px;
+  }
+
+  nav ul li a {
+    font-size: 20px;
+  }
+
+  a:hover,
+  a.active {
+    background: none;
+    color: #0082e6;
+    text-decoration: none; /* Ensure no underline on hover */
+  }
+
+  /* Styling for Total Planners Badge */
+  .streak-badge {
+    font-size: 1rem; /* Adjust font size */
+    padding: 0.5rem 1rem; /* Adjust padding for smaller screens */
+    margin-top: 0.5rem; /* Add margin to separate badge from other content */
+    display: inline-block;
+    text-align: center;
+    width: 90%; /* Center the badge on smaller screens */
+    margin-left: 5%; /* Add horizontal centering */
+  }
+
+  /* Fixing overall layout for smaller screens */
+  .planner-section {
+    margin-bottom: 1rem; /* Add space between planner section and cards */
+  }
+
+  .card-uniform {
+    min-height: 200px; /* Adjust card height to fit smaller screens */
+  }
+
+  .planner-btn {
+    font-size: 1.2rem; /* Slightly smaller for buttons */
+    padding: 10px 20px; /* Adjust button padding */
+  }
+
+
+.dashboard-container {
+  text-align: center;
+  padding: 20px;
+  background-color: #f7f7f7;
+  border: 1px solid #ddd;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-message {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.timetable-img {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.timetable-img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-body img {
+  max-height: 80vh;
+}
+
+.btn-edit {
+  margin-left: 10px;
+}
+
+/* Add fade-out animation for flash messages */
+.flash-message {
+  transition: opacity 1s ease-out;
+}
+
+.flash-message.fade-out {
+  opacity: 0;
+}
+
+/* Updated styles for the edit note textarea */
+.edit-note-textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Ensure parent container is wide enough */
+.container {
+  width: 100%;
+  max-width: 800px; /* Adjust this value as needed */
+  margin: 0 auto; /* Center the container */
+}
+
+/* Styles for the dashboard cards */
+.card {
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.card-text {
+  font-size: 18px;
+}
+
+.progress {
+  height: 20px;
+}
+
+.progress-bar {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Styles for the home link */
+.home-link {
+  color: white;
+  text-decoration: none;
+  border-radius: 15px;
+  padding: 5px 10px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.home-link:hover {
+  background: #ffffff;
+  color: #0082e6;
+  text-decoration: none; /* Ensure no underline on hover */
+}
+
+.home-link i {
+  margin-right: 5px;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+/* Apply shake animation only to delete buttons */
+button.btn-danger:active {
+  animation: shake 0.5s;
+  animation-iteration-count: 1;
+}
+
+.modal-body img {
+  max-height: 90vh;
+  max-width: 100%;
+}
+.valid-feedback {
+  display: none;
+}
+
+.is-valid ~ .valid-feedback {
+  display: block;
+}
+
+.toggle-password {
+  right: 15px; /* Ensures it stays away from the edge */
+  top: 50%; /* Centers vertically within the input */
+  transform: translateY(-50%);
+  z-index: 2; /* Ensures it doesn't overlap other elements */
+  font-size: 1.2rem; /* Makes it a bit larger for better usability */
+  color: #6c757d; /* Neutral gray */
+}
+
+.toggle-password:hover {
+  color: #007bff; /* Blue color on hover for visual feedback */
+}}

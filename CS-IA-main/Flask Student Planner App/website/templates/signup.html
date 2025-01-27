@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="container py-5 d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg border-0 p-4" style="max-width: 500px; width: 100%;">
+        <h3 class="text-center text-primary mb-4">Sign Up</h3>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div>
+                {% for category, message in messages %}
+        
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" id="signupForm">
+            <div class="form-group mb-3 position-relative">
+                <label for="email" class="form-label fw-bold">Email</label>
+                <div class="input-group">
+                    <input
+                        type="email"
+                        class="form-control rounded-pill"
+                        id="email"
+                        name="email"
+                        placeholder="example@gmail.com"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div class="form-group mb-3 position-relative">
+                <label for="fullname" class="form-label fw-bold">Full Name</label>
+                <div class="input-group">
+                    <input
+                        type="text"
+                        class="form-control rounded-pill"
+                        id="fullname"
+                        name="fullname"
+                        placeholder="Full Name"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label fw-bold">Select Role</label>
+                <div class="d-flex justify-content-center gap-3 mt-2">
+                    <button type="button" class="btn btn-outline-primary role-btn" data-role="student">Student</button>
+                    <button type="button" class="btn btn-outline-primary role-btn" data-role="teacher">Teacher</button>
+                </div>
+                <input type="hidden" id="role" name="role" required>
+                <div id="roleError" class="text-danger mt-2 d-none">Please select a role.</div>
+            </div>
+
+            <div class="form-group mb-3 position-relative">
+                <label for="password1" class="form-label fw-bold">Password</label>
+                <div class="input-group">
+                    <input
+                        type="password"
+                        class="form-control rounded-pill"
+                        id="password1"
+                        name="password1"
+                        placeholder="Enter Password"
+                        required
+                    />
+                    <span class="position-absolute end-0 me-5 top-50 translate-middle-y" style="cursor: pointer;">
+                        <i class="fas fa-eye" id="togglePassword1"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-group mb-4 position-relative">
+                <label for="password2" class="form-label fw-bold">Confirm Password</label>
+                <div class="input-group">
+                    <input
+                        type="password"
+                        class="form-control rounded-pill"
+                        id="password2"
+                        name="password2"
+                        placeholder="Confirm Password"
+                        required
+                    />
+                    <span class="position-absolute end-0 me-5 top-50 translate-middle-y" style="cursor: pointer;">
+                        <i class="fas fa-eye" id="togglePassword2"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button
+                    type="submit"
+                    id="signupButton"
+                    class="btn btn-primary rounded-pill btn-lg d-flex align-items-center justify-content-center"
+                >
+                    <span>Sign Up</span>
+                    <span id="spinner" class="spinner-border spinner-border-sm text-light ms-2 d-none" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+
+            <div class="text-center mt-3">
+                <span class="text-muted">Have an account already?</span>
+                <a href="{{ url_for('auth.login') }}" class="text-primary fw-bold">Login</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const emailInput = document.getElementById("email");
+        const password1Input = document.getElementById("password1");
+        const password2Input = document.getElementById("password2");
+        const togglePassword1 = document.getElementById("togglePassword1");
+        const togglePassword2 = document.getElementById("togglePassword2");
+        const roleButtons = document.querySelectorAll(".role-btn");
+        const roleInput = document.getElementById("role");
+        const roleError = document.getElementById("roleError");
+
+        function togglePasswordVisibility(toggleElement, inputElement) {
+            toggleElement.addEventListener("click", function () {
+                const isPasswordVisible = inputElement.getAttribute("type") === "text";
+                inputElement.setAttribute("type", isPasswordVisible ? "password" : "text");
+                toggleElement.classList.toggle("fa-eye", isPasswordVisible);
+                toggleElement.classList.toggle("fa-eye-slash", !isPasswordVisible);
+            });
+        }
+
+        togglePasswordVisibility(togglePassword1, password1Input);
+        togglePasswordVisibility(togglePassword2, password2Input);
+
+        emailInput.addEventListener("input", function () {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(emailInput.value)) {
+                emailInput.classList.remove("is-invalid");
+                emailInput.classList.add("is-valid");
+            } else {
+                emailInput.classList.remove("is-valid");
+                emailInput.classList.add("is-invalid");
+            }
+        });
+
+        password1Input.addEventListener("input", function () {
+            if (password1Input.value.length >= 6) {
+                password1Input.classList.remove("is-invalid");
+                password1Input.classList.add("is-valid");
+            } else {
+                password1Input.classList.remove("is-valid");
+                password1Input.classList.add("is-invalid");
+            }
+        });
+
+        password2Input.addEventListener("input", function () {
+            if (password2Input.value === password1Input.value && password2Input.value.length >= 6) {
+                password2Input.classList.remove("is-invalid");
+                password2Input.classList.add("is-valid");
+            } else {
+                password2Input.classList.remove("is-valid");
+                password2Input.classList.add("is-invalid");
+            }
+        });
+
+        roleButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                roleInput.value = this.getAttribute("data-role");
+                roleButtons.forEach(btn => btn.classList.remove("active", "btn-primary"));
+                this.classList.add("active", "btn-primary");
+                roleError.classList.add("d-none");
+            });
+        });
+    });
+</script>
+{% endblock %}
